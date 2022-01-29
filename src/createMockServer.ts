@@ -30,6 +30,7 @@ export async function createMockServer(
     supportTs: true,
     configPath: 'vite.mock.config.ts',
     logger: true,
+    timeout: 0,
     ...opt,
   }
 
@@ -69,8 +70,14 @@ export async function requestMiddleware(opt: ViteMockOptions) {
       const isGet = req.method && req.method.toUpperCase() === 'GET'
       const { response, rawResponse, timeout, statusCode, url } = matchRequest
 
-      if (timeout) {
-        await sleep(timeout)
+      if (timeout || opt.timeout) {
+        let sleeptime = timeout ?? opt.timeout
+        if (typeof sleeptime === 'string' && sleeptime.indexOf('-') !== -1) {
+          const [min, max] = sleeptime.split('-') ?? [120, 800]
+          sleeptime = parseInt(Math.random() * Number(max) + Number(min), 10)
+        }
+        console.log('MockServe timeout: ====> ', `${sleeptime}ms`)
+        await sleep(sleeptime)
       }
 
       const urlMatch = match(url, { decode: decodeURIComponent })

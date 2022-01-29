@@ -1,8 +1,16 @@
+/*
+ * @Author       : Lance Ma
+ * @Date         : 2022-01-29 14:53:22
+ * @LastEditors  : Lance Ma
+ * @LastEditTime : 2022-01-29 15:01:34
+ * @FilePath     : \es\createProdMockServer.js
+ * @Descripttion : 
+ */
 /* eslint-disable */
 import mockJs from 'mockjs'
 import { pathToRegexp } from 'path-to-regexp'
 const Mock = mockJs
-export function createProdMockServer(mockList) {
+export function createProdMockServer(mockList, delay) {
   Mock.XHR.prototype.__send = Mock.XHR.prototype.send
   Mock.XHR.prototype.send = function () {
     if (this.custom.xhr) {
@@ -31,7 +39,13 @@ export function createProdMockServer(mockList) {
     }
   }
   for (const { url, method, response, timeout } of mockList) {
-    __setupMock__(timeout)
+    let sleeptime = timeout ?? delay
+    if (typeof sleeptime === 'string' && sleeptime.indexOf('-') !== -1) {
+        const [min, max] = sleeptime.split('-') ?? [120, 800]
+        sleeptime = parseInt(Math.random() * Number(max) + Number(min), 10)
+    }
+      console.log('MockProdServe timeout: ====> ', `${sleeptime}ms`, timeout, delay)
+    __setupMock__(sleeptime);
     Mock.mock(
       pathToRegexp(url, undefined, { end: false }),
       method || 'get',
