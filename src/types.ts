@@ -1,3 +1,4 @@
+
 import { IncomingMessage, ServerResponse } from 'http'
 
 export interface ViteMockOptions {
@@ -30,7 +31,7 @@ export type Recordable<T = any> = Record<string, T>
 export declare interface MockMethod {
   url: string
   method?: MethodType
-  timeout?: number
+  timeout?: number|string
   statusCode?: number
   response?:
     | ((
